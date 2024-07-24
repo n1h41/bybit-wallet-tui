@@ -49,6 +49,7 @@ func (w walletModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "backspace":
 			return NewEntryModel()
 		case "r":
+			w.loading = true
 			return w, tea.Batch(w.spinner.Tick, w.getWalletBalance())
 		case "q":
 			return w, tea.Quit
