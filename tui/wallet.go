@@ -18,10 +18,11 @@ var baseStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("240"))
 
 type walletModel struct {
-	spinner spinner.Model
-	loading bool
-	table   table.Model
-	repo    repository.BybitRepository
+	spinner             spinner.Model
+	loading             bool
+	table               table.Model
+	repo                repository.BybitRepository
+	walletTotalUSDValue float64
 }
 
 // Init implements tea.Model.
@@ -47,6 +48,8 @@ func (w walletModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "backspace":
 			return NewEntryModel()
+		case "r":
+			return w, tea.Batch(w.spinner.Tick, w.getWalletBalance())
 		case "q":
 			return w, tea.Quit
 		default:
@@ -63,12 +66,13 @@ func (w *walletModel) generateTable(msg constants.WalletBalanceMsg) {
 	columns := []table.Column{
 		{Title: "Coin", Width: 6},
 		{Title: "USD Value", Width: 10},
+		{Title: "Amount", Width: 10},
 	}
 	total := calculateTotalOfRows(rows)
-	rows = append(rows, total)
-	rows = append(rows, rows...)
-	rows = append(rows, rows...)
-	w.table = table.New(table.WithColumns(columns), table.WithRows(rows), table.WithHeight(15), table.WithFocused(true))
+	w.walletTotalUSDValue = total
+	ts := table.DefaultStyles()
+	ts.Header = table.DefaultStyles().Header.Foreground(lipgloss.Color("99"))
+	w.table = table.New(table.WithColumns(columns), table.WithRows(rows), table.WithHeight(constants.WindowSize.Height-5), table.WithFocused(true), table.WithStyles(ts))
 }
 
 func (w walletModel) getWalletBalance() tea.Cmd {
@@ -79,6 +83,7 @@ func (w walletModel) getWalletBalance() tea.Cmd {
 			rows = append(rows, table.Row{
 				item.Coin,
 				item.UsdValue,
+				item.WalletBalance,
 			})
 		}
 		sort.Slice(rows, func(i, j int) bool {
@@ -90,10 +95,12 @@ func (w walletModel) getWalletBalance() tea.Cmd {
 
 // View implements tea.Model.
 func (w walletModel) View() string {
+	totalStr := "Total USD Value: $" + strconv.FormatFloat(w.walletTotalUSDValue, 'f', 2, 64)
+	totalStr = lipgloss.NewStyle().Padding(0, 0, 1, 1).Bold(true).Foreground(lipgloss.Color("200")).Render(totalStr)
 	if w.loading {
 		return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
 	}
-	return baseStyle.Render(w.table.View())
+	return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(w.table.View()), totalStr))
 }
 
 func NewWalletModel(repo repository.BybitRepository) tea.Model {
@@ -105,11 +112,11 @@ func NewWalletModel(repo repository.BybitRepository) tea.Model {
 	}
 }
 
-func calculateTotalOfRows(rows []table.Row) table.Row {
+func calculateTotalOfRows(rows []table.Row) float64 {
 	var total float64
 	for _, row := range rows {
 		value, _ := strconv.ParseFloat(row[1], 64)
 		total += value
 	}
-	return table.Row{"Total", strconv.FormatFloat(total, 'f', 4, 64)}
+	return total
 }

@@ -1,0 +1,1 @@
+GET https://api-testnet.bybit.com/v5/market/kline?category=inverse&symbol=INJUSDT&interval=60&start=1670601600000&end=1670608800000

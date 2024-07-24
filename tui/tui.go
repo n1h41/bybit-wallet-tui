@@ -79,15 +79,18 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		constants.WindowSize = msg
 		return m, nil
 	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, keys.Quit):
+		switch msg.String() {
+		case "q":
 			return m, tea.Quit
-		case key.Matches(msg, keys.Help):
+		case "h":
 			m.help.ShowAll = !m.help.ShowAll
 			return m, nil
-		case key.Matches(msg, keys.Balance):
+		case "w":
 			walletModel := NewWalletModel(constants.Repo)
 			return walletModel, walletModel.Init()
+		case "d":
+			depositModel := NewDepositModel()
+			return depositModel, depositModel.Init()
 		default:
 			return m, nil
 		}
@@ -99,7 +102,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View implements tea.Model.
 func (m mainModel) View() string {
 	windowSize := constants.WindowSize
-	contentView := fmt.Sprintf("%s\n%s\n%s", "n1h41", "Bybit Wallet TUI", "Press 'c' to continue")
+	contentView := fmt.Sprintf("%s\n%s", "n1h41", "Bybit Wallet TUI")
 	helpView := m.help.View(m.keys)
 	helpView = lipgloss.NewStyle().MarginTop(windowSize.Height / 2).Render(helpView)
 	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, contentView, helpView))
