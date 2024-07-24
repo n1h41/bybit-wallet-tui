@@ -14,7 +14,7 @@ import (
 )
 
 var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
+	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
 type walletModel struct {
@@ -101,7 +101,7 @@ func (w walletModel) View() string {
 	if w.loading {
 		return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
 	}
-	return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(w.table.View()), totalStr))
+	return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, baseStyle.Render(w.table.View()), totalStr))
 }
 
 func NewWalletModel(repo repository.BybitRepository) tea.Model {
