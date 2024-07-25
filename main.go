@@ -64,6 +64,8 @@ func main() {
 }
 
 func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
+	pty, _, _ := s.Pty()
+
 	f, _ := tea.LogToFile("debug.log", "Debug: ")
 	defer f.Close()
 
@@ -82,6 +84,10 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 		Url:        "https://api.bybit.com",
 	}
 
+	constants.Renderer = bubbletea.MakeRenderer(s)
+	constants.WindowSize.Width = pty.Window.Width
+	constants.WindowSize.Height = pty.Window.Height
+
 	client := &http.Client{Timeout: 10 * time.Second}
 
 	constants.Repo = repository.NewBybitRepo(bybitConfig, client)
@@ -89,9 +95,4 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 	m, _ := tui.NewEntryModel()
 
 	return m, []tea.ProgramOption{tea.WithAltScreen()}
-	/* p := tea.NewProgram(m, tea.WithAltScreen())
-	if _, err := p.Run(); err != nil {
-		log.Fatal(err)
-		os.Exit(1)
-	} */
 }

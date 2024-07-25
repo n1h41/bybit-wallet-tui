@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"log"
 	"sort"
 	"strconv"
 
@@ -18,6 +19,7 @@ var baseStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("240"))
 
 type walletModel struct {
+	size                tea.WindowSizeMsg
 	spinner             spinner.Model
 	loading             bool
 	table               table.Model
@@ -42,7 +44,8 @@ func (w walletModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		w.generateTable(msg)
 		return w, nil
 	case tea.WindowSizeMsg:
-		constants.WindowSize = msg
+		log.Println(msg)
+		w.size = msg
 		return w, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -64,6 +67,7 @@ func (w walletModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (w *walletModel) generateTable(msg constants.WalletBalanceMsg) {
+	windowSize := constants.WindowSize
 	rows := msg.Rows
 	columns := []table.Column{
 		{Title: "Coin", Width: 6},
@@ -74,7 +78,7 @@ func (w *walletModel) generateTable(msg constants.WalletBalanceMsg) {
 	w.walletTotalUSDValue = total
 	ts := table.DefaultStyles()
 	ts.Header = table.DefaultStyles().Header.Foreground(lipgloss.Color("99"))
-	w.table = table.New(table.WithColumns(columns), table.WithRows(rows), table.WithHeight(constants.WindowSize.Height-5), table.WithFocused(true), table.WithStyles(ts))
+	w.table = table.New(table.WithColumns(columns), table.WithRows(rows), table.WithHeight(windowSize.Height-5), table.WithFocused(true), table.WithStyles(ts))
 }
 
 func (w walletModel) getWalletBalance() tea.Cmd {
@@ -97,12 +101,13 @@ func (w walletModel) getWalletBalance() tea.Cmd {
 
 // View implements tea.Model.
 func (w walletModel) View() string {
+	windowSize := constants.WindowSize
 	totalStr := "Total USD Value: $" + strconv.FormatFloat(w.walletTotalUSDValue, 'f', 2, 64)
 	totalStr = lipgloss.NewStyle().Padding(0, 0, 1, 1).Bold(true).Foreground(lipgloss.Color("200")).Render(totalStr)
 	if w.loading {
-		return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
+		return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
 	}
-	return lipgloss.Place(constants.WindowSize.Width, constants.WindowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, baseStyle.Render(w.table.View()), totalStr))
+	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, baseStyle.Render(w.table.View()), totalStr))
 }
 
 func NewWalletModel(repo repository.BybitRepository) tea.Model {

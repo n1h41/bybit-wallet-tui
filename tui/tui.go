@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -55,6 +56,7 @@ var keys = keyMap{
 }
 
 type mainModel struct {
+	size    tea.WindowSizeMsg
 	spinner spinner.Model
 	state   viewState
 	keys    keyMap
@@ -74,7 +76,8 @@ func NewEntryModel() (tea.Model, tea.Cmd) {
 
 // Init implements tea.Model.
 func (m mainModel) Init() tea.Cmd {
-	return spinner.Tick
+	log.Println("Init")
+	return m.spinner.Tick
 }
 
 // Update implements tea.Model.
@@ -83,7 +86,8 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.spinner, sCmd = m.spinner.Update(msg)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		constants.WindowSize = msg
+		log.Println(msg)
+		m.size = msg
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
