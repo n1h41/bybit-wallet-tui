@@ -70,7 +70,7 @@ func NewEntryModel() (tea.Model, tea.Cmd) {
 	return mainModel{
 		spinner: s,
 		keys:    keys,
-		help:    help.New(),
+		help:    help.New()
 	}, nil
 }
 
@@ -97,10 +97,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = !m.help.ShowAll
 			return m, nil
 		case "w":
-			walletModel := NewWalletModel(constants.Repo)
-			return walletModel, walletModel.Init()
+			walletModel := NewWalletModel(constants.Repo, m.size)
+			return walletModel, tea.Batch(walletModel.Init())
 		case "d":
-			depositModel := NewDepositModel()
+			depositModel := NewDepositModel(m.size)
 			return depositModel, depositModel.Init()
 		default:
 			return m, nil

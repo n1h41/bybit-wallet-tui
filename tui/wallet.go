@@ -50,8 +50,10 @@ func (w walletModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "backspace":
+<<<<< HEAD
 			mainModel, _ := NewEntryModel()
 			return mainModel, mainModel.Init()
+			return NewEntryModel(w.size)
 		case "r":
 			w.loading = true
 			return w, tea.Batch(w.spinner.Tick, w.getWalletBalance())
@@ -67,7 +69,7 @@ func (w walletModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (w *walletModel) generateTable(msg constants.WalletBalanceMsg) {
-	windowSize := constants.WindowSize
+	windowSize := w.size
 	rows := msg.Rows
 	columns := []table.Column{
 		{Title: "Coin", Width: 6},
@@ -101,18 +103,19 @@ func (w walletModel) getWalletBalance() tea.Cmd {
 
 // View implements tea.Model.
 func (w walletModel) View() string {
-	windowSize := constants.WindowSize
+	windowSize := w.size
 	totalStr := "Total USD Value: $" + strconv.FormatFloat(w.walletTotalUSDValue, 'f', 2, 64)
 	totalStr = lipgloss.NewStyle().Padding(0, 0, 1, 1).Bold(true).Foreground(lipgloss.Color("200")).Render(totalStr)
 	if w.loading {
 		return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
 	}
-	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Left, baseStyle.Render(w.table.View()), totalStr))
+	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(w.table.View()), totalStr))
 }
 
-func NewWalletModel(repo repository.BybitRepository) tea.Model {
+func NewWalletModel(repo repository.BybitRepository, size tea.WindowSizeMsg) tea.Model {
 	s := spinner.New()
 	return walletModel{
+		size:    size,
 		spinner: s,
 		loading: true,
 		repo:    repo,

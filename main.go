@@ -92,7 +92,7 @@ func teaHandler(s ssh.Session) (tea.Model, []tea.ProgramOption) {
 
 	constants.Repo = repository.NewBybitRepo(bybitConfig, client)
 
-	m, _ := tui.NewEntryModel()
+	m, _ := tui.NewEntryModel(tea.WindowSizeMsg{})
 
 	return m, []tea.ProgramOption{tea.WithAltScreen()}
 }
