@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 
@@ -54,26 +55,32 @@ var keys = keyMap{
 }
 
 type mainModel struct {
-	state viewState
-	keys  keyMap
-	help  help.Model
-	repo  repository.BybitRepository
+	spinner spinner.Model
+	state   viewState
+	keys    keyMap
+	help    help.Model
+	repo    repository.BybitRepository
 }
 
 func NewEntryModel() (tea.Model, tea.Cmd) {
+	s := spinner.New()
+	s.Spinner = spinner.Globe
 	return mainModel{
-		keys: keys,
-		help: help.New(),
+		spinner: s,
+		keys:    keys,
+		help:    help.New(),
 	}, nil
 }
 
 // Init implements tea.Model.
 func (m mainModel) Init() tea.Cmd {
-	return nil
+	return spinner.Tick
 }
 
 // Update implements tea.Model.
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var sCmd tea.Cmd
+	m.spinner, sCmd = m.spinner.Update(msg)
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		constants.WindowSize = msg
@@ -95,7 +102,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 	default:
-		return m, nil
+		return m, tea.Batch(sCmd)
 	}
 }
 
@@ -105,5 +112,5 @@ func (m mainModel) View() string {
 	contentView := fmt.Sprintf("%s\n%s", "n1h41", "Bybit Wallet")
 	helpView := m.help.View(m.keys)
 	helpView = lipgloss.NewStyle().MarginTop(windowSize.Height / 2).Render(helpView)
-	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, contentView, helpView))
+	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, contentView, helpView, m.spinner.View()))
 }
