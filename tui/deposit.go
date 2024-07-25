@@ -6,10 +6,14 @@ import (
 	"n1h41/bybit-wallet-tui/tui/constants"
 )
 
-type depositModel struct{}
+type depositModel struct {
+	size tea.WindowSizeMsg
+}
 
-func NewDepositModel() tea.Model {
-	return depositModel{}
+func NewDepositModel(size tea.WindowSizeMsg) tea.Model {
+	return depositModel{
+		size: size,
+	}
 }
 
 // Init implements tea.Model.
@@ -26,7 +30,7 @@ func (d depositModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "backspace":
-			return NewEntryModel()
+			return NewEntryModel(d.size)
 		case "q":
 			return d, tea.Quit
 		default:

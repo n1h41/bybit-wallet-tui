@@ -2,6 +2,7 @@ package tui
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -54,14 +55,16 @@ var keys = keyMap{
 }
 
 type mainModel struct {
+	size  tea.WindowSizeMsg
 	state viewState
 	keys  keyMap
 	help  help.Model
 	repo  repository.BybitRepository
 }
 
-func NewEntryModel() (tea.Model, tea.Cmd) {
+func NewEntryModel(size tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 	return mainModel{
+		size: size,
 		keys: keys,
 		help: help.New(),
 	}, nil
@@ -76,7 +79,8 @@ func (m mainModel) Init() tea.Cmd {
 func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
-		constants.WindowSize = msg
+		log.Println(msg)
+		m.size = msg
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -86,10 +90,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.help.ShowAll = !m.help.ShowAll
 			return m, nil
 		case "w":
-			walletModel := NewWalletModel(constants.Repo)
-			return walletModel, walletModel.Init()
+			walletModel := NewWalletModel(constants.Repo, m.size)
+			return walletModel, tea.Batch(walletModel.Init())
 		case "d":
-			depositModel := NewDepositModel()
+			depositModel := NewDepositModel(m.size)
 			return depositModel, depositModel.Init()
 		default:
 			return m, nil
@@ -101,7 +105,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model.
 func (m mainModel) View() string {
-	windowSize := constants.WindowSize
+	windowSize := m.size
 	contentView := fmt.Sprintf("%s\n%s", "n1h41", "Bybit Wallet TUI")
 	helpView := m.help.View(m.keys)
 	helpView = lipgloss.NewStyle().MarginTop(windowSize.Height / 2).Render(helpView)

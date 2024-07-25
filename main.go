@@ -38,7 +38,7 @@ func main() {
 
 	constants.Repo = repository.NewBybitRepo(bybitConfig, client)
 
-	m, _ := tui.NewEntryModel()
+	m, _ := tui.NewEntryModel(tea.WindowSizeMsg{})
 
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
