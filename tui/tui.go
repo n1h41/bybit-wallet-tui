@@ -64,19 +64,19 @@ type mainModel struct {
 	repo    repository.BybitRepository
 }
 
-func NewEntryModel() (tea.Model, tea.Cmd) {
+func NewEntryModel(size tea.WindowSizeMsg) (tea.Model, tea.Cmd) {
 	s := spinner.New()
 	s.Spinner = spinner.Globe
 	return mainModel{
+		size:    size,
 		spinner: s,
 		keys:    keys,
-		help:    help.New()
+		help:    help.New(),
 	}, nil
 }
 
 // Init implements tea.Model.
 func (m mainModel) Init() tea.Cmd {
-	log.Println("Init")
 	return m.spinner.Tick
 }
 
@@ -112,7 +112,7 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model.
 func (m mainModel) View() string {
-	windowSize := constants.WindowSize
+	windowSize := m.size
 	contentView := fmt.Sprintf("%s\n%s", "n1h41", "Bybit Wallet")
 	helpView := m.help.View(m.keys)
 	helpView = lipgloss.NewStyle().MarginTop(windowSize.Height / 2).Render(helpView)
