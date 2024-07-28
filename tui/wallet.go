@@ -14,7 +14,7 @@ import (
 	"n1h41/bybit-wallet-tui/tui/constants"
 )
 
-var baseStyle = lipgloss.NewStyle().
+var baseStyle = constants.Renderer.NewStyle().
 	BorderStyle(lipgloss.RoundedBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
