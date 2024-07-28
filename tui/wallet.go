@@ -101,13 +101,14 @@ func (w walletModel) getWalletBalance() tea.Cmd {
 
 // View implements tea.Model.
 func (w walletModel) View() string {
+	renderer := constants.Renderer
 	windowSize := w.size
 	totalStr := "Total USD Value: $" + strconv.FormatFloat(w.walletTotalUSDValue, 'f', 2, 64)
-	totalStr = lipgloss.NewStyle().Padding(0, 0, 1, 1).Bold(true).Foreground(lipgloss.Color("200")).Render(totalStr)
+	totalStr = renderer.NewStyle().Padding(0, 0, 1, 1).Bold(true).Foreground(lipgloss.Color("200")).Render(totalStr)
 	if w.loading {
-		return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
+		return renderer.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, w.spinner.View())
 	}
-	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(w.table.View()), totalStr))
+	return renderer.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, baseStyle.Render(w.table.View()), totalStr))
 }
 
 func NewWalletModel(repo repository.BybitRepository, size tea.WindowSizeMsg) tea.Model {

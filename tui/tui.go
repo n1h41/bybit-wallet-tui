@@ -112,9 +112,10 @@ func (m mainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View implements tea.Model.
 func (m mainModel) View() string {
+	renderer := constants.Renderer
 	windowSize := m.size
 	contentView := fmt.Sprintf("%s\n%s", "n1h41", "Bybit Wallet")
 	helpView := m.help.View(m.keys)
-	helpView = lipgloss.NewStyle().MarginTop(windowSize.Height / 2).Render(helpView)
-	return lipgloss.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, contentView, helpView, m.spinner.View()))
+	helpView = renderer.NewStyle().MarginTop(windowSize.Height / 2).Render(helpView)
+	return renderer.Place(windowSize.Width, windowSize.Height, lipgloss.Center, lipgloss.Center, lipgloss.JoinVertical(lipgloss.Center, contentView, helpView, m.spinner.View()))
 }

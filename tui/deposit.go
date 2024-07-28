@@ -30,7 +30,8 @@ func (d depositModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "backspace":
-			return NewEntryModel(d.size)
+			mainModel, _ := NewEntryModel(d.size)
+			return mainModel, mainModel.Init()
 		case "q":
 			return d, tea.Quit
 		default:
